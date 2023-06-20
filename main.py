@@ -8,6 +8,23 @@ STARTING_LATITUDE = 42.654361
 STARTING_LONGITUDE = -83.23361
 STARTING_ALTITUDE = 282  # meters
 
+PORT = ""
+BAUDRATE = 115200
+NAME = ""
+
+
+def get_serial_port_location_by_serial_number(serial_number):
+    for port in serial.tools.list_ports.comports():
+        if port.serial_number == serial_number:
+            return port.location
+
+
+def get_serial_port_location_by_name(device_name):
+    for port in serial.tools.list_ports.comports():
+        if device_name in port.name:
+            return port.location
+
+
 
 def serial_ports():
     """ Lists serial port names
@@ -38,6 +55,15 @@ def serial_ports():
     return result
 
 
+def run_locations(filename):
+    with (
+        open(filename, 'r') as file,
+        serial.Serial(port=PORT, baudrate=BAUDRATE) as ser
+    ):
+        line = file.readline()
+        ser.write(data=line.encode("UTF-8"))
+
+
 def main():
     """
     This function sets the default time, date, and location for CLAW Simulator GPS
@@ -49,10 +75,10 @@ def main():
 
     # the GPS requires 8-N-1 which is default the baud rate required is 115200
     # https://en.wikipedia.org/wiki/8-N-1
-    with serial.Serial(port='', baudrate=115200) as ser:
+    with serial.Serial(port=PORT, baudrate=BAUDRATE) as ser:
         for string in [time_setting_string, date_setting_string, position_setting_string]:
             ser.write(data=string.encode("UTF-8"))
 
 
 if __name__ == '__main__':
-    print(serial_ports())
+    main()

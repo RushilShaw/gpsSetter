@@ -1,4 +1,5 @@
 import serial
+import serial.tools.list_ports
 import datetime
 import time
 
@@ -14,8 +15,8 @@ NAME = "Silicon Labs CP210x USB to UART Bridge"
 
 def get_serial_port_location_by_name(device_name):
     for port in serial.tools.list_ports.comports():
-        if device_name in port.name:
-            return port.location
+        if port.description.startswith(device_name):
+            return port.name
 
 
 def run_locations(filename):
@@ -39,6 +40,10 @@ def main():
     """
     This function sets the default time, date, and location for CLAW Simulator GPS
     """
+    global PORT
+    if PORT is None:
+        PORT = get_serial_port_location_by_name(NAME)
+
     now = datetime.datetime.now()
 
     manual_setting_string = "SIM:MODE MANUAL"

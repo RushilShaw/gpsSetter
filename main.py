@@ -7,7 +7,9 @@ import time
 # 42.654 N 83.233 W is the coordinates for CTC which is 282 meters above sea level
 NEW_LATITUDE = 42.654
 NEW_LONGITUDE = -83.233
-NEW_ALTITUDE = 282  # meters
+NEW_ALTITUDE_METERS = 282
+
+# TODO Add functionality to override time
 
 GPS_DEVICE_NAME = "Silicon Labs CP210x USB to UART Bridge"
 GPS_DEVICE_BAUD = 115200
@@ -27,8 +29,8 @@ def send_commands_to_gps_from_file(filename):
     ):
         time.sleep(1)
         for line in file.readline():
-            line = line.strip()
-            line += "\r"
+            # line = line.strip()
+            # line += "\r"
             comport.write(data=line.encode("UTF-8"))
             time.sleep(1)
 
@@ -43,12 +45,12 @@ def set_gps_starting_location_and_current_time():
 
     now = datetime.datetime.now()
 
-    manual_mode_string = "SIM:MODE MANUAL"
-    time_setting_string = f"SIMulation:TIME:START:TIME {now.hour},{now.minute},{now.second}"
-    date_setting_string = f"SIMulation:TIME:START:DATE {now.year},{now.month},{now.day}"
-    position_setting_string = f"SIMulation:POSition:LLH {NEW_LATITUDE},{NEW_LONGITUDE},{NEW_ALTITUDE}"
+    simulation_start = "SIM:COM START"
+    time_set = f"SIMulation:TIME:START:TIME {now.hour},{now.minute},{now.second}"
+    date_set = f"SIMulation:TIME:START:DATE {now.year},{now.month},{now.day}"
+    position_set = f"SIMulation:POSition:LLH {NEW_LATITUDE},{NEW_LONGITUDE},{NEW_ALTITUDE_METERS}"
 
-    commands = [manual_mode_string, time_setting_string, date_setting_string, position_setting_string]
+    commands = [simulation_start, time_set, date_set, position_set]
 
     # opens a serial communication to the GPS device and sends the list of commands
     with serial.Serial(port=GPS_DEVICE_PORT, baudrate=GPS_DEVICE_BAUD) as comport:

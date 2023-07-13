@@ -23,25 +23,15 @@ def get_serial_port_by_device_name(device_name: str):
             return port.name
 
 
-def send_commands_to_gps_from_file(filename: str):
-    with (
-        open(filename, 'r') as file,
-        serial.Serial(port=GPS_DEVICE_PORT, baudrate=GPS_DEVICE_BAUD) as comport
-    ):
-        time.sleep(1)
-        for line in file.readline():
-            comport.write(data=line.encode("UTF-8"))
-            time.sleep(1)
-
-
 def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
                               new_location: list[float, float, float], new_datetime: datetime.datetime) -> None:
 
     longitude, latitude, altitude = new_location
 
     gps_commands = [
-        "SIM:COM START",
         "SIM:POS:MODE FIXED",
+        "SIM:MODE SIM",
+        "SIM:COM START",
         f"SIMulation:TIME:START:TIME {new_datetime.hour},{new_datetime.minute},{new_datetime.second}",
         f"SIMulation:TIME:START:DATE {new_datetime.year},{new_datetime.month},{new_datetime.day}",
         f"SIMulation:POSition:LLH {longitude},{latitude},{altitude}",

@@ -1,16 +1,12 @@
+import json
+import sys
+import pathlib
 import serial
 import serial.tools.list_ports
-import datetime
+from datetime import datetime, timezone
 import time
 
-
-# 42.654 N 83.233 W is the coordinates for CTC which is 282 meters above sea level
-NEW_LATITUDE = 42.654
-NEW_LONGITUDE = -83.233
-NEW_ALTITUDE_METERS = 282.0
-
-# if None then the current computer time will be used. To insert a custom time use a datetime.datetime() object in UTC
-NEW_TIME = None
+DEFAULT_FILEPATH = pathlib.Path("config.json")
 
 GPS_DEVICE_NAME = "Silicon Labs CP210x USB to UART Bridge"
 GPS_DEVICE_BAUD = 115200
@@ -35,7 +31,6 @@ def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
         f"SIMulation:TIME:START:TIME {new_datetime.hour},{new_datetime.minute},{new_datetime.second}",
         f"SIMulation:TIME:START:DATE {new_datetime.year},{new_datetime.month},{new_datetime.day}",
         f"SIMulation:POSition:LLH {longitude},{latitude},{altitude}",
-        "SIM:COM STOP"
     ]
 
     # opens a serial communication to the GPS device and sends the list of commands
@@ -47,14 +42,34 @@ def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
             time.sleep(1)
 
 
-if __name__ == '__main__':
+def main():
+    global DEFAULT_FILEPATH, GPS_DEVICE_PORT, GPS_DEVICE_BAUD, GPS_DEVICE_NAME
+
+    filepath = DEFAULT_FILEPATH
+    if len(sys.argv) >= 2:
+        filename = sys.argv[1]
+        if not filename.endswith(".json"):
+            raise ValueError("Specified path must be a .json")
+        filepath = pathlib.Path(filename)
+
+    if not filepath.is_file():
+        raise FileNotFoundError(f"{filepath.absolute()} is not a file.")
+
+    with open(filepath, 'r') as file:
+        data = json.load(file)
+
     if GPS_DEVICE_PORT is None:
         GPS_DEVICE_PORT = get_serial_port_by_device_name(GPS_DEVICE_NAME)
 
-    NEW_LOCATION = [NEW_LONGITUDE, NEW_LATITUDE, NEW_ALTITUDE_METERS]
+    new_location = [data["NEW_LATITUDE"], data["NEW_LONGITUDE"], data["NEW_ALTITUDE_METERS"]]
+    new_datetime = data["NEW_DATETIME"]
 
-    if NEW_TIME is None:
-        NEW_TIME = datetime.datetime.now(datetime.timezone.utc)
+    if new_datetime is None:
+        new_datetime = datetime.now(timezone.utc)
 
     set_gps_location_and_time(gps_device_port=GPS_DEVICE_PORT, gps_baudrate=GPS_DEVICE_BAUD,
-                              new_location=NEW_LOCATION, new_datetime=NEW_TIME)
+                              new_location=new_location, new_datetime=new_datetime)
+
+
+if __name__ == '__main__':
+    main()

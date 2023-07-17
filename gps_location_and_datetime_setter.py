@@ -20,8 +20,8 @@ def get_serial_port_by_device_name(device_name: str):
 
 
 def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
-                              new_location: list[float, float, float], new_datetime: datetime.datetime) -> None:
-
+                              new_location: list[float, float, float], new_datetime: datetime) -> None:
+    return
     longitude, latitude, altitude = new_location
 
     gps_commands = [
@@ -61,15 +61,20 @@ def main():
     if GPS_DEVICE_PORT is None:
         GPS_DEVICE_PORT = get_serial_port_by_device_name(GPS_DEVICE_NAME)
 
-    new_location = [data["NEW_LATITUDE"], data["NEW_LONGITUDE"], data["NEW_ALTITUDE_METERS"]]
-    new_datetime = data["NEW_DATETIME"]
+    new_location = [data["LATITUDE"], data["LONGITUDE"], data["ALTITUDE_METERS"]]
+    new_datetime_from_json = data.get("DATETIME")
 
-    if new_datetime is None:
+    if not new_datetime_from_json:
         new_datetime = datetime.now(timezone.utc)
+    else:
+        new_datetime = datetime.fromisoformat(new_datetime_from_json)
 
     set_gps_location_and_time(gps_device_port=GPS_DEVICE_PORT, gps_baudrate=GPS_DEVICE_BAUD,
                               new_location=new_location, new_datetime=new_datetime)
 
+    print(new_datetime)
+    print(filepath)
+    print(GPS_DEVICE_PORT)
 
 if __name__ == '__main__':
     main()

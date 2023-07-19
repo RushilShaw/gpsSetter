@@ -15,17 +15,17 @@ It reads the configuration from a JSON file and sends the necessary commands to 
 
 ```json
 {
-  "LATITUDE": <latitude>,
-  "LONGITUDE": <longitude>,
+  "LATITUDE_DEGREES": <latitude>,
+  "LONGITUDE_DEGREES": <longitude>,
   "ALTITUDE_METERS": <altitude>,
-  "DATETIME": "<YYYY-MM-DD HH:MM:SS>"
+  "DATETIME_ISO_8601": "<YYYY-MM-DD HH:MM:SS>"
 }
 ```
 
-- `LATITUDE`: The new latitude value in decimal degrees.
-- `LONGITUDE`: The new longitude value in decimal degrees.
+- `LATITUDE_DEGREES`: The new latitude value in decimal degrees.
+- `LONGITUDE_DEGREES`: The new longitude value in decimal degrees.
 - `ALTITUDE_METERS`: The new altitude value in meters.
-- `DATETIME`: (Optional) The new date and time in UTC to set on the GPS device. If not provided, the current date and time will be used.
+- `DATETIME_ISO_8601`: (Optional) The new date and time in UTC to set on the GPS device. If not provided, the current date and time will be used.
 
 3. Run the script by executing the following command in the terminal:
 
@@ -43,7 +43,3 @@ The script provides some configurable parameters at the beginning of the code:
 - `GPS_DEVICE_NAME`: The name of the GPS device. Modify this value if your GPS device has a different name.
 - `GPS_DEVICE_BAUD`: The baud rate for the GPS device. Modify this value if your GPS device requires a different baud rate.
 - `GPS_DEVICE_PORT`: The serial port of the GPS device. If set to `None`, the script will automatically detect the port based on the device name.
-
-## License
-
-This script is released under the [MIT License](https://opensource.org/licenses/MIT).

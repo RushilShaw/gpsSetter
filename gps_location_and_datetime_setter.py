@@ -1,10 +1,11 @@
-import json
 import sys
-import pathlib
+import time
+import json
 import serial
+import pathlib
 import serial.tools.list_ports
 from datetime import datetime, timezone
-import time
+
 
 DEFAULT_FILEPATH = pathlib.Path("config.json")
 
@@ -21,8 +22,7 @@ def get_serial_port_by_device_name(device_name: str):
 
 def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
                               new_location: list[float, float, float], new_datetime: datetime) -> None:
-    return
-    longitude, latitude, altitude = new_location
+    longitude_degrees, latitude_degrees, altitude_meters = new_location
 
     gps_commands = [
         "SIM:POS:MODE FIXED",
@@ -30,7 +30,7 @@ def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
         "SIM:COM START",
         f"SIMulation:TIME:START:TIME {new_datetime.hour},{new_datetime.minute},{new_datetime.second}",
         f"SIMulation:TIME:START:DATE {new_datetime.year},{new_datetime.month},{new_datetime.day}",
-        f"SIMulation:POSition:LLH {longitude},{latitude},{altitude}",
+        f"SIMulation:POSition:LLH {longitude_degrees},{latitude_degrees},{altitude_meters}",
     ]
 
     # opens a serial communication to the GPS device and sends the list of commands
@@ -43,38 +43,37 @@ def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
 
 
 def main():
-    global DEFAULT_FILEPATH, GPS_DEVICE_PORT, GPS_DEVICE_BAUD, GPS_DEVICE_NAME
+    gps_port = GPS_DEVICE_PORT
+    if gps_port is None:
+        gps_port = get_serial_port_by_device_name(GPS_DEVICE_NAME)
 
-    filepath = DEFAULT_FILEPATH
+    config_filepath: pathlib.Path
+    # if an argument was specified, use the argument for config_filepath instead of the default filepath
     if len(sys.argv) >= 2:
-        filename = sys.argv[1]
-        if not filename.endswith(".json"):
+        filepath = sys.argv[1]
+        if not filepath.endswith(".json"):
             raise ValueError("Specified path must be a .json")
-        filepath = pathlib.Path(filename)
+        config_filepath = pathlib.Path(filepath)
+    else:
+        config_filepath = DEFAULT_FILEPATH
 
-    if not filepath.is_file():
-        raise FileNotFoundError(f"{filepath.absolute()} is not a file.")
+    if not config_filepath.is_file():
+        raise FileNotFoundError(f"{config_filepath.absolute()} is not a file.")
 
-    with open(filepath, 'r') as file:
-        data = json.load(file)
+    with open(config_filepath, 'r') as file:
+        config = json.load(file)
 
-    if GPS_DEVICE_PORT is None:
-        GPS_DEVICE_PORT = get_serial_port_by_device_name(GPS_DEVICE_NAME)
-
-    new_location = [data["LATITUDE"], data["LONGITUDE"], data["ALTITUDE_METERS"]]
-    new_datetime_from_json = data.get("DATETIME")
+    new_location = [config["LATITUDE_DEGREES"], config["LONGITUDE_DEGREES"], config["ALTITUDE_METERS"]]
+    new_datetime_from_json = config.get("DATETIME_ISO_8601")
 
     if not new_datetime_from_json:
         new_datetime = datetime.now(timezone.utc)
     else:
         new_datetime = datetime.fromisoformat(new_datetime_from_json)
 
-    set_gps_location_and_time(gps_device_port=GPS_DEVICE_PORT, gps_baudrate=GPS_DEVICE_BAUD,
+    set_gps_location_and_time(gps_device_port=gps_port, gps_baudrate=GPS_DEVICE_BAUD,
                               new_location=new_location, new_datetime=new_datetime)
 
-    print(new_datetime)
-    print(filepath)
-    print(GPS_DEVICE_PORT)
 
 if __name__ == '__main__':
     main()

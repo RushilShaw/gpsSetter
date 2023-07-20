@@ -26,6 +26,7 @@ def set_gps_location_and_time(gps_device_port: str, gps_baudrate: int,
 
     gps_commands = [
         "SIM:POS:MODE FIXED",
+        "SIM:TIME:MODE ASSIGN",
         "SIM:MODE SIM",
         "SIM:COM START",
         f"SIMulation:TIME:START:TIME {new_datetime.hour},{new_datetime.minute},{new_datetime.second}",

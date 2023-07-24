@@ -1,4 +1,5 @@
 import tkinter
+from tkcalendar import Calendar
 import gps_location_and_datetime_setter
 
 
@@ -20,12 +21,18 @@ class MyWindow:
         self.label_entry_dict = {}
         index = 0
         for index, name in enumerate(boxes):
-            tkinter.Label(win, text=f'{name}: ').place(x=10, y=10 + 25 * index)
-            entry_box = tkinter.Entry(win, show="")
+            tkinter.Label(self.window, text=f'{name}: ').place(x=10, y=10 + 25 * index)
+            entry_box = tkinter.Entry(self.window, show="")
             entry_box.place(x=150, y=10 + 25 * index)
             self.label_entry_dict[name] = entry_box
 
-        tkinter.Button(window, text='Run', fg='black', bg='white',
+        cal = Calendar(self.window, selectmode='day',
+                       year=2020, month=5,
+                       day=22)
+
+        cal.pack(pady=20)
+
+        tkinter.Button(self.window, text='Run', fg='black', bg='white',
                        command=self.run, height=1, width=7).place(x=150, y=10 + 25 * (index + 1))
 
     def run(self):

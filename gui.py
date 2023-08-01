@@ -1,5 +1,6 @@
 import tkinter
 from tkcalendar import Calendar
+from tktimepicker import AnalogPicker, AnalogThemes
 import gps_location_and_datetime_setter
 
 
@@ -31,6 +32,9 @@ class MyWindow:
                        day=22)
 
         cal.pack(pady=20)
+
+        time_picker = AnalogPicker(self.window)
+        time_picker.pack(expand=True, fill="both")
 
         tkinter.Button(self.window, text='Run', fg='black', bg='white',
                        command=self.run, height=1, width=7).place(x=150, y=10 + 25 * (index + 1))
